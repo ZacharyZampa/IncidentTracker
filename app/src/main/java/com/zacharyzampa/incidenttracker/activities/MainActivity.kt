@@ -7,12 +7,14 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.zacharyzampa.incidenttracker.IncidentApplication
 import com.zacharyzampa.incidenttracker.R
 import com.zacharyzampa.incidenttracker.entity.Incident
+import com.zacharyzampa.incidenttracker.utils.SwipeDeleteCallback
 import com.zacharyzampa.incidenttracker.views.IncidentListAdapter
 import com.zacharyzampa.incidenttracker.views.IncidentViewModel
 import com.zacharyzampa.incidenttracker.views.IncidentViewModelFactory
@@ -21,7 +23,7 @@ import com.zacharyzampa.incidenttracker.views.IncidentViewModelFactory
 class MainActivity : AppCompatActivity() {
 
     private val newWordActivityRequestCode = 1
-    private val wordViewModel: IncidentViewModel by viewModels {
+    private val incidentViewModel: IncidentViewModel by viewModels {
         IncidentViewModelFactory((application as IncidentApplication).repository)
     }
 
@@ -33,6 +35,18 @@ class MainActivity : AppCompatActivity() {
         val adapter = IncidentListAdapter()
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val swipeDeleteHandler = object : SwipeDeleteCallback(this) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                incidentViewModel.allIncidents.value?.get(viewHolder.adapterPosition)?.let {
+                    incidentViewModel.delete(it)
+                }
+//                incidentViewModel.removeAddressAtIndex(viewHolder.adapterPosition)
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(swipeDeleteHandler)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+
         recyclerView.addItemDecoration(
             DividerItemDecoration(
                 recyclerView.context,
@@ -43,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         // Add an observer on the LiveData returned by getAlphabetizedWords.
         // The onChanged() method fires when the observed data changes and the activity is
         // in the foreground.
-        wordViewModel.allWords.observe(this) { words ->
+        incidentViewModel.allIncidents.observe(this) { words ->
             // Update the cached copy of the words in the adapter.
             words.let { adapter.submitList(it) }
         }
@@ -60,8 +74,8 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == newWordActivityRequestCode && resultCode == Activity.RESULT_OK) {
             intentData?.getStringExtra(NewIncidentActivity.EXTRA_REPLY)?.let { reply ->
-                val word = Incident(reply)
-                wordViewModel.insert(word)
+                val incident = Incident(reply)
+                incidentViewModel.insert(incident)
             }
         } else {
             Toast.makeText(

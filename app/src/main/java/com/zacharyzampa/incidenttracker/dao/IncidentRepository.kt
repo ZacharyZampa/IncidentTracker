@@ -18,4 +18,9 @@ class IncidentRepository(private val incidentDao: IncidentDao) {
     suspend fun insert(incident: Incident) {
         incidentDao.insert(incident)
     }
+
+    @WorkerThread
+    suspend fun delete(incident: Incident) {
+        incidentDao.delete(incident)
+    }
 }
