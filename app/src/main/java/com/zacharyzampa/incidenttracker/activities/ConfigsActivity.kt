@@ -6,13 +6,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.zacharyzampa.incidenttracker.R
-import com.zacharyzampa.incidenttracker.entity.Config
+import com.zacharyzampa.incidenttracker.model.Config
 
 class ConfigsActivity : AppCompatActivity() {
 
@@ -65,7 +62,7 @@ class ConfigsActivity : AppCompatActivity() {
     private fun saveConfigs(to: String, cc: String, subject: String, body: String) {
         val sharedPref = getSharedPreferences("config_file", MODE_PRIVATE)
 
-        var editor = sharedPref.edit()
+        val editor = sharedPref.edit()
         editor.putString(getString(R.string.config_to), to)
         editor.putString(getString(R.string.config_cc), cc)
         editor.putString(getString(R.string.config_subject), subject)
@@ -81,7 +78,7 @@ class ConfigsActivity : AppCompatActivity() {
         val subject = sharedPref.getString(getString(R.string.config_subject), getString(R.string.hint_subject))!!
         val body = sharedPref.getString(getString(R.string.config_body), getString(R.string.hint_body))!!
 
-        return Config(0, to, cc, subject, body)
+        return Config(to, cc, subject, body)
     }
 
 }

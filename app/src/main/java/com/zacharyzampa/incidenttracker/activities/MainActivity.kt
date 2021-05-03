@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.zacharyzampa.incidenttracker.IncidentApplication
 import com.zacharyzampa.incidenttracker.R
-import com.zacharyzampa.incidenttracker.entity.Config
+import com.zacharyzampa.incidenttracker.model.Config
 import com.zacharyzampa.incidenttracker.entity.Incident
 import com.zacharyzampa.incidenttracker.utils.IncidentClickListener
 import com.zacharyzampa.incidenttracker.utils.SwipeDeleteCallback
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
         setContentView(R.layout.activity_main)
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerview)
-        val adapter = IncidentListAdapter() { address -> adapterOnClick(address) }
+        val adapter = IncidentListAdapter { address -> adapterOnClick(address) }
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -150,6 +150,6 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
         val subject = sharedPref.getString(getString(R.string.config_subject), getString(R.string.hint_subject))!!
         val body = sharedPref.getString(getString(R.string.config_body), getString(R.string.hint_body))!!
 
-        return Config(0, to, cc, subject, body)
+        return Config(to, cc, subject, body)
     }
 }
