@@ -7,7 +7,10 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.zacharyzampa.incidenttracker.R
 import com.zacharyzampa.incidenttracker.entity.Config
 
@@ -16,39 +19,39 @@ class ConfigsActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_email)
-        val editToView = findViewById<EditText>(R.id.edit_to)
-        val editCcView = findViewById<EditText>(R.id.edit_cc)
-        val editSubjectView = findViewById<EditText>(R.id.edit_subject)
-        val editBodyView = findViewById<EditText>(R.id.edit_body)
+        val editToView = findViewById<TextInputLayout>(R.id.edit_to)
+        val editCcView = findViewById<TextInputLayout>(R.id.edit_cc)
+        val editSubjectView = findViewById<TextInputLayout>(R.id.edit_subject)
+        val editBodyView = findViewById<TextInputLayout>(R.id.edit_body)
 
         val config = getConfig()
 
-        editToView.setText(config.to)
-        editCcView.setText(config.cc)
-        editSubjectView.setText(config.subject)
-        editBodyView.setText(config.body)
+        editToView.editText?.append(config.to)
+        editCcView.editText?.append(config.cc)
+        editSubjectView.editText?.append(config.subject)
+        editBodyView.editText?.append(config.body)
 
 
 
         val button = findViewById<Button>(R.id.button_save)
         button.setOnClickListener {
             val replyIntent = Intent()
-            if (TextUtils.isEmpty(editToView.text)
-                or TextUtils.isEmpty(editCcView.text)
-                or TextUtils.isEmpty(editSubjectView.text)
-                or TextUtils.isEmpty(editBodyView.text)) {
+            if (TextUtils.isEmpty(editToView.editText?.text)
+                or TextUtils.isEmpty(editCcView.editText?.text)
+                or TextUtils.isEmpty(editSubjectView.editText?.text)
+                or TextUtils.isEmpty(editBodyView.editText?.text)) {
                 setResult(Activity.RESULT_CANCELED, replyIntent)
             } else {
-                val to = editToView.text.toString()
+                val to = editToView.editText?.text.toString()
                 replyIntent.putExtra("to", to)
 
-                val cc = editCcView.text.toString()
+                val cc = editCcView.editText?.text.toString()
                 replyIntent.putExtra("cc", cc)
 
-                val subject = editSubjectView.text.toString()
+                val subject = editSubjectView.editText?.text.toString()
                 replyIntent.putExtra("subject", subject)
 
-                val body = editBodyView.text.toString()
+                val body = editBodyView.editText?.text.toString()
                 replyIntent.putExtra("body", body)
 
                 setResult(Activity.RESULT_OK, replyIntent)

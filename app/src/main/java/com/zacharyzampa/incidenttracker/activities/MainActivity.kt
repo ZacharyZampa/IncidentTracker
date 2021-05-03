@@ -112,40 +112,17 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
 //                "it was emptied.\n\n" +
 //                "Address: "+ (incident?.incident ?: "") + "\n\n" +
 //                "Thank you"
-        val body = config.body
+//        val body = config.
+        val body = config.body.replace("<<incident>>", incident.incident)
         intent.putExtra(Intent.EXTRA_TEXT, body)
 
         startActivity(intent)
     }
 
     override fun onIncidentClick(position: Int) {
-        val intent = Intent(Intent.ACTION_SEND)
+        val incident = incidentViewModel.allIncidents.value?.get(position)!!
 
-        val incident = incidentViewModel.allIncidents.value?.get(position)
-
-        intent.type = "plain/text"
-
-        val config = getConfig()
-
-//        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
-//        val emailListCC = arrayOf("zampaze@miamioh.edu")
-
-        val emailList = config.to.split(",").map { it.trim() }.toTypedArray()
-        val emailListCC = config.cc.split(",").map { it.trim() }.toTypedArray()
-
-        intent.putExtra(Intent.EXTRA_EMAIL, emailList)
-        intent.putExtra(Intent.EXTRA_CC, emailListCC)
-
-        intent.putExtra(Intent.EXTRA_SUBJECT, config.subject)
-
-//        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
-//                "it was emptied.\n\n" +
-//                "Address: "+ (incident?.incident ?: "") + "\n\n" +
-//                "Thank you"
-        val body = config.body
-        intent.putExtra(Intent.EXTRA_TEXT, body)
-
-        startActivity(intent)
+        adapterOnClick(incident)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

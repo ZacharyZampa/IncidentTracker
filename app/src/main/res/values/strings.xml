@@ -14,4 +14,6 @@
     <string name="config_cc">configCc</string>
     <string name="config_subject">configSubject</string>
     <string name="config_body">configBody</string>
+    <string name="helper_email">Enter in email(s), separate with commas</string>
+    <string name="helper_body">Use the variable &lt;&lt;incident&gt;&gt; for where you wish the incident content to be injected in the email.</string>
 </resources>
