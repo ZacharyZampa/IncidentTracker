@@ -1,8 +1,11 @@
 package com.zacharyzampa.incidenttracker.activities
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.zacharyzampa.incidenttracker.IncidentApplication
 import com.zacharyzampa.incidenttracker.R
+import com.zacharyzampa.incidenttracker.entity.Config
 import com.zacharyzampa.incidenttracker.entity.Incident
 import com.zacharyzampa.incidenttracker.utils.IncidentClickListener
 import com.zacharyzampa.incidenttracker.utils.SwipeDeleteCallback
@@ -91,18 +95,24 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
 
         intent.type = "plain/text"
 
-        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
-        val emailListCC = arrayOf("zampaze@miamioh.edu")
+        val config = getConfig()
+
+//        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
+//        val emailListCC = arrayOf("zampaze@miamioh.edu")
+
+        val emailList = config.to.split(",").map { it.trim() }.toTypedArray()
+        val emailListCC = config.cc.split(",").map { it.trim() }.toTypedArray()
 
         intent.putExtra(Intent.EXTRA_EMAIL, emailList)
         intent.putExtra(Intent.EXTRA_CC, emailListCC)
 
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Trash Can Not Removed")
+        intent.putExtra(Intent.EXTRA_SUBJECT, config.subject)
 
-        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
-                "it was emptied.\n\n" +
-                "Address: "+ incident.incident + "\n\n" +
-                "Thank you"
+//        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
+//                "it was emptied.\n\n" +
+//                "Address: "+ (incident?.incident ?: "") + "\n\n" +
+//                "Thank you"
+        val body = config.body
         intent.putExtra(Intent.EXTRA_TEXT, body)
 
         startActivity(intent)
@@ -115,20 +125,54 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
 
         intent.type = "plain/text"
 
-        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
-        val emailListCC = arrayOf("zampaze@miamioh.edu")
+        val config = getConfig()
+
+//        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
+//        val emailListCC = arrayOf("zampaze@miamioh.edu")
+
+        val emailList = config.to.split(",").map { it.trim() }.toTypedArray()
+        val emailListCC = config.cc.split(",").map { it.trim() }.toTypedArray()
 
         intent.putExtra(Intent.EXTRA_EMAIL, emailList)
         intent.putExtra(Intent.EXTRA_CC, emailListCC)
 
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Trash Can Not Removed")
+        intent.putExtra(Intent.EXTRA_SUBJECT, config.subject)
 
-        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
-                "it was emptied.\n\n" +
-                "Address: "+ (incident?.incident ?: "") + "\n\n" +
-                "Thank you"
+//        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
+//                "it was emptied.\n\n" +
+//                "Address: "+ (incident?.incident ?: "") + "\n\n" +
+//                "Thank you"
+        val body = config.body
         intent.putExtra(Intent.EXTRA_TEXT, body)
 
         startActivity(intent)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val menuInflater = menuInflater
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.configs -> {
+                val configureAppIntent = Intent(this@MainActivity, ConfigsActivity::class.java)
+                startActivity(configureAppIntent)
+                true
+            }
+            else -> false
+        }
+    }
+
+    private fun getConfig(): Config {
+        val sharedPref = getSharedPreferences("config_file", Context.MODE_PRIVATE)
+        val to = sharedPref.getString(getString(R.string.config_to), getString(R.string.hint_to))!!
+        val cc = sharedPref.getString(getString(R.string.config_cc), getString(R.string.hint_cc))!!
+        val subject = sharedPref.getString(getString(R.string.config_subject), getString(R.string.hint_subject))!!
+        val body = sharedPref.getString(getString(R.string.config_body), getString(R.string.hint_body))!!
+
+        return Config(0, to, cc, subject, body)
     }
 }
