@@ -14,13 +14,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.zacharyzampa.incidenttracker.IncidentApplication
 import com.zacharyzampa.incidenttracker.R
 import com.zacharyzampa.incidenttracker.entity.Incident
+import com.zacharyzampa.incidenttracker.utils.IncidentClickListener
 import com.zacharyzampa.incidenttracker.utils.SwipeDeleteCallback
 import com.zacharyzampa.incidenttracker.views.IncidentListAdapter
 import com.zacharyzampa.incidenttracker.views.IncidentViewModel
 import com.zacharyzampa.incidenttracker.views.IncidentViewModelFactory
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), IncidentClickListener {
 
     private val newWordActivityRequestCode = 1
     private val incidentViewModel: IncidentViewModel by viewModels {
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerview)
-        val adapter = IncidentListAdapter()
+        val adapter = IncidentListAdapter() { address -> adapterOnClick(address) }
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -41,7 +42,6 @@ class MainActivity : AppCompatActivity() {
                 incidentViewModel.allIncidents.value?.get(viewHolder.adapterPosition)?.let {
                     incidentViewModel.delete(it)
                 }
-//                incidentViewModel.removeAddressAtIndex(viewHolder.adapterPosition)
             }
         }
         val itemTouchHelper = ItemTouchHelper(swipeDeleteHandler)
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        // Add an observer on the LiveData returned by getAlphabetizedWords.
+        // Add an observer on the LiveData
         // The onChanged() method fires when the observed data changes and the activity is
         // in the foreground.
         incidentViewModel.allIncidents.observe(this) { words ->
@@ -84,5 +84,51 @@ class MainActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    private fun adapterOnClick(incident: Incident) {
+        val intent = Intent(Intent.ACTION_SEND)
+
+        intent.type = "plain/text"
+
+        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
+        val emailListCC = arrayOf("zampaze@miamioh.edu")
+
+        intent.putExtra(Intent.EXTRA_EMAIL, emailList)
+        intent.putExtra(Intent.EXTRA_CC, emailListCC)
+
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Trash Can Not Removed")
+
+        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
+                "it was emptied.\n\n" +
+                "Address: "+ incident.incident + "\n\n" +
+                "Thank you"
+        intent.putExtra(Intent.EXTRA_TEXT, body)
+
+        startActivity(intent)
+    }
+
+    override fun onIncidentClick(position: Int) {
+        val intent = Intent(Intent.ACTION_SEND)
+
+        val incident = incidentViewModel.allIncidents.value?.get(position)
+
+        intent.type = "plain/text"
+
+        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
+        val emailListCC = arrayOf("zampaze@miamioh.edu")
+
+        intent.putExtra(Intent.EXTRA_EMAIL, emailList)
+        intent.putExtra(Intent.EXTRA_CC, emailListCC)
+
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Trash Can Not Removed")
+
+        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
+                "it was emptied.\n\n" +
+                "Address: "+ (incident?.incident ?: "") + "\n\n" +
+                "Thank you"
+        intent.putExtra(Intent.EXTRA_TEXT, body)
+
+        startActivity(intent)
     }
 }

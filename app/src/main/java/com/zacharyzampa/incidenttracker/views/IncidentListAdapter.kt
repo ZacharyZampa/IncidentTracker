@@ -11,42 +11,53 @@ import com.zacharyzampa.incidenttracker.R
 import com.zacharyzampa.incidenttracker.views.IncidentListAdapter.IncidentViewHolder
 import com.zacharyzampa.incidenttracker.entity.Incident
 
-class IncidentListAdapter : ListAdapter<Incident, IncidentViewHolder>(INCIDENT_COMPARATOR) {
+class IncidentListAdapter(private val onClick: (Incident) -> Unit) :
+        ListAdapter<Incident, IncidentViewHolder>(IncidentDiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IncidentViewHolder {
-        return IncidentViewHolder.create(parent)
-    }
-
-    override fun onBindViewHolder(holder: IncidentViewHolder, position: Int) {
-        val current = getItem(position)
-        holder.bind(current.incident)
-    }
-
-    class IncidentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class IncidentViewHolder(itemView: View, val onClick: (Incident) -> Unit) :
+            RecyclerView.ViewHolder(itemView) {
         private val incidentItemView: TextView = itemView.findViewById(R.id.textView)
 
-        fun bind(text: String?) {
-            incidentItemView.text = text
+        private var currentIncident: Incident? = null
+
+        init {
+            itemView.setOnClickListener {
+                currentIncident?.let {
+                    onClick(it)
+                }
+            }
         }
 
-        companion object {
-            fun create(parent: ViewGroup): IncidentViewHolder {
-                val view: View = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.recyclerview_item, parent, false)
-                return IncidentViewHolder(view)
-            }
+        // bind incident details to object
+        fun bind(incident: Incident) {
+            currentIncident = incident
+
+            incidentItemView.text = incident.incident
         }
     }
 
-    companion object {
-        private val INCIDENT_COMPARATOR = object : DiffUtil.ItemCallback<Incident>() {
-            override fun areItemsTheSame(oldItem: Incident, newItem: Incident): Boolean {
-                return oldItem === newItem
-            }
+    /* Creates and inflates view and return IncidentViewHolder. */
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IncidentViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.recyclerview_item, parent, false)
+        return IncidentViewHolder(view, onClick)
+    }
 
-            override fun areContentsTheSame(oldItem: Incident, newItem: Incident): Boolean {
-                return oldItem.incident == newItem.incident
-            }
-        }
+    // get the current incident and bind it to the view
+    override fun onBindViewHolder(holder: IncidentViewHolder, position: Int) {
+        val incident = getItem(position)
+        holder.bind(incident)
+
+    }
+
+}
+
+object IncidentDiffCallback : DiffUtil.ItemCallback<Incident>() {
+    override fun areItemsTheSame(oldItem: Incident, newItem: Incident): Boolean {
+        return oldItem == newItem
+    }
+
+    override fun areContentsTheSame(oldItem: Incident, newItem: Incident): Boolean {
+        return oldItem.incident == newItem.incident
     }
 }
+
