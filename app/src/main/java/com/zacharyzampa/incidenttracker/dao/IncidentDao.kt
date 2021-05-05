@@ -7,8 +7,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface IncidentDao {
 
-    @Query("SELECT * FROM incident_table")
+    @Query("SELECT * FROM incident_table WHERE deleted = FALSE")
     fun getIncidents(): Flow<List<Incident>>
+
+    @Query("SELECT * FROM incident_table")
+    fun getAllOccurrencesOfIncidents(): Flow<List<Incident>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(incident: Incident)
@@ -16,6 +19,6 @@ interface IncidentDao {
     @Query("DELETE FROM incident_table")
     suspend fun deleteAll()
 
-    @Delete
+    @Update
     suspend fun delete(incident: Incident)
 }

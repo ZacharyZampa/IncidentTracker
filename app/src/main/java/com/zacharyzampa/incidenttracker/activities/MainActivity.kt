@@ -16,18 +16,29 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.zacharyzampa.incidenttracker.IncidentApplication
 import com.zacharyzampa.incidenttracker.R
-import com.zacharyzampa.incidenttracker.model.Config
 import com.zacharyzampa.incidenttracker.entity.Incident
+import com.zacharyzampa.incidenttracker.model.Config
 import com.zacharyzampa.incidenttracker.utils.IncidentClickListener
 import com.zacharyzampa.incidenttracker.utils.SwipeDeleteCallback
 import com.zacharyzampa.incidenttracker.views.IncidentListAdapter
 import com.zacharyzampa.incidenttracker.views.IncidentViewModel
 import com.zacharyzampa.incidenttracker.views.IncidentViewModelFactory
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), IncidentClickListener {
 
     private val newWordActivityRequestCode = 1
+    private var formatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
+    private var offset: ZoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
+
+    private lateinit var everyIncident: List<Incident>
+
     private val incidentViewModel: IncidentViewModel by viewModels {
         IncidentViewModelFactory((application as IncidentApplication).repository)
     }
@@ -44,6 +55,7 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
         val swipeDeleteHandler = object : SwipeDeleteCallback(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 incidentViewModel.allIncidents.value?.get(viewHolder.adapterPosition)?.let {
+                    it.deleted = true
                     incidentViewModel.delete(it)
                 }
             }
@@ -61,9 +73,13 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
         // Add an observer on the LiveData
         // The onChanged() method fires when the observed data changes and the activity is
         // in the foreground.
-        incidentViewModel.allIncidents.observe(this) { words ->
+        incidentViewModel.allIncidents.observe(this) { incidents ->
             // Update the cached copy of the words in the adapter.
-            words.let { adapter.submitList(it) }
+            incidents.let { adapter.submitList(it) }
+        }
+
+        incidentViewModel.everyIncident.observe(this) { incidents ->
+            incidents.let { everyIncident = incidents }
         }
 
         val fab = findViewById<FloatingActionButton>(R.id.fab)
@@ -78,7 +94,13 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
 
         if (requestCode == newWordActivityRequestCode && resultCode == Activity.RESULT_OK) {
             intentData?.getStringExtra(NewIncidentActivity.EXTRA_REPLY)?.let { reply ->
-                val incident = Incident(reply)
+
+                val incident = Incident(
+                    reply,
+                    LocalDateTime.now().toEpochSecond(offset),
+                    false
+                )
+
                 incidentViewModel.insert(incident)
             }
         } else {
@@ -97,9 +119,6 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
 
         val config = getConfig()
 
-//        val emailList = arrayOf("zack99809@gmail.com", "zackzampa@gmail.com")
-//        val emailListCC = arrayOf("zampaze@miamioh.edu")
-
         val emailList = config.to.split(",").map { it.trim() }.toTypedArray()
         val emailListCC = config.cc.split(",").map { it.trim() }.toTypedArray()
 
@@ -108,12 +127,9 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
 
         intent.putExtra(Intent.EXTRA_SUBJECT, config.subject)
 
-//        val body = "Hello,\nThe following address did not remove their trash can from the curb after " +
-//                "it was emptied.\n\n" +
-//                "Address: "+ (incident?.incident ?: "") + "\n\n" +
-//                "Thank you"
-//        val body = config.
-        val body = config.body.replace("<<incident>>", incident.incident)
+        val body = config.body
+                .replace("<<incident>>", incident.incident)
+                .replace("<<occurrences>>", getAllOccurrences(incident))
         intent.putExtra(Intent.EXTRA_TEXT, body)
 
         startActivity(intent)
@@ -147,9 +163,29 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
         val sharedPref = getSharedPreferences("config_file", Context.MODE_PRIVATE)
         val to = sharedPref.getString(getString(R.string.config_to), getString(R.string.hint_to))!!
         val cc = sharedPref.getString(getString(R.string.config_cc), getString(R.string.hint_cc))!!
-        val subject = sharedPref.getString(getString(R.string.config_subject), getString(R.string.hint_subject))!!
-        val body = sharedPref.getString(getString(R.string.config_body), getString(R.string.hint_body))!!
+        val subject = sharedPref.getString(
+            getString(R.string.config_subject),
+            getString(R.string.hint_subject)
+        )!!
+        val body = sharedPref.getString(
+            getString(R.string.config_body),
+            getString(R.string.hint_body)
+        )!!
 
         return Config(to, cc, subject, body)
+    }
+
+    private fun getAllOccurrences(incident: Incident): String {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("\n")
+        incidentViewModel.everyIncident.value
+            ?.filter { elt -> elt.incident == incident.incident }
+            ?.forEach { elt -> stringBuilder.append(
+                    LocalDateTime.ofEpochSecond(elt.timestamp, 0, offset).format(formatter) + "\n"
+                )
+            }
+
+
+        return stringBuilder.toString()
     }
 }

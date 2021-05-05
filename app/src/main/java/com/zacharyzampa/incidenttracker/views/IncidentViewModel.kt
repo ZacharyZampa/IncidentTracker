@@ -13,6 +13,8 @@ class IncidentViewModel(private val repository: IncidentRepository) : ViewModel(
     // - Repository is completely separated from the UI through the ViewModel.
     val allIncidents: LiveData<List<Incident>> = repository.incidents.asLiveData()
 
+    val everyIncident: LiveData<List<Incident>> = repository.getAllOfIncidents.asLiveData()
+
     /**
      * Launching a new coroutine to insert the data in a non-blocking way
      */
@@ -23,6 +25,7 @@ class IncidentViewModel(private val repository: IncidentRepository) : ViewModel(
     fun delete(incident: Incident) = viewModelScope.launch {
         repository.delete(incident)
     }
+
 }
 
 class IncidentViewModelFactory(private val repository: IncidentRepository) : ViewModelProvider.Factory {

@@ -2,7 +2,10 @@ package com.zacharyzampa.incidenttracker.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "incident_table")
-data class Incident(@PrimaryKey @ColumnInfo(name = "incident") val incident: String)
+@Entity(tableName = "incident_table", primaryKeys = ["incident", "timestamp"])
+data class Incident(
+        @ColumnInfo(name = "incident") val incident: String,
+        @ColumnInfo(name = "timestamp") val timestamp: Long,
+        @ColumnInfo(name = "deleted") var deleted: Boolean
+        )
