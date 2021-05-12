@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface IncidentDao {
 
-    @Query("SELECT * FROM incident_table WHERE deleted = FALSE")
+    @Query("SELECT * FROM incident_table WHERE deleted = 0")
     fun getIncidents(): Flow<List<Incident>>
 
     @Query("SELECT * FROM incident_table")

@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
         val swipeDeleteHandler = object : SwipeDeleteCallback(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 incidentViewModel.allIncidents.value?.get(viewHolder.adapterPosition)?.let {
-                    it.deleted = true
+                    it.deleted = 1
                     incidentViewModel.delete(it)
                 }
             }
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity(), IncidentClickListener {
                 val incident = Incident(
                     reply,
                     LocalDateTime.now().toEpochSecond(offset),
-                    false
+                    0
                 )
 
                 incidentViewModel.insert(incident)

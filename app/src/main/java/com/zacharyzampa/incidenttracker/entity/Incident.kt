@@ -7,5 +7,5 @@ import androidx.room.Entity
 data class Incident(
         @ColumnInfo(name = "incident") val incident: String,
         @ColumnInfo(name = "timestamp") val timestamp: Long,
-        @ColumnInfo(name = "deleted") var deleted: Boolean
+        @ColumnInfo(name = "deleted") var deleted: Int
         )

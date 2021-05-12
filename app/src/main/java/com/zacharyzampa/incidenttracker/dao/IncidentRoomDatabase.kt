@@ -68,13 +68,13 @@ abstract class IncidentRoomDatabase : RoomDatabase() {
             // Not needed if you only populate on creation.
             incidentDao.deleteAll()
 
-            var incident = Incident("Hi, I am a sample incident", Instant.now().toEpochMilli(), false)
+            var incident = Incident("Hi, I am a sample incident", Instant.now().toEpochMilli(), 0)
             incidentDao.insert(incident)
-            incident = Incident("Add more incidents using the plus button", Instant.now().toEpochMilli(), false)
+            incident = Incident("Add more incidents using the plus button", Instant.now().toEpochMilli(), 0)
             incidentDao.insert(incident)
-            incident = Incident("Remove an incident by swiping left or right on it", Instant.now().toEpochMilli(), false)
+            incident = Incident("Remove an incident by swiping left or right on it", Instant.now().toEpochMilli(), 0)
             incidentDao.insert(incident)
-            incident = Incident("Configure email settings in the top right button", Instant.now().toEpochMilli(), false)
+            incident = Incident("Configure email settings in the top right button", Instant.now().toEpochMilli(), 0)
             incidentDao.insert(incident)
         }
     }
